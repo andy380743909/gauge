@@ -12,6 +12,13 @@ gauge.music = require "music"
 
 local tween = require "tween"
 
+local errorMessage = nil
+
+-- celiaTheme = gauge.music.new({file="game/carefulwiththatcakecelia.ogg", volume=1, loop=true})
+--littleTheme.play()
+--bigTheme.play()
+-- celiaTheme.play()
+
 love.load = function ()
   local context = gauge.input.context.new({active = true})
   context.map = function (raw_in, map_in)
@@ -34,12 +41,13 @@ love.load = function ()
   end)
   
   local native_mode = modes[1]
-  love.window.setMode(native_mode.width, native_mode.height, { fullscreen = true })
+  love.window.setMode(1024, 768, { fullscreen = false })
   
 
   local game_state = gauge.state.new()
   gauge.event.subscribe("loadMap", function (arg)
-    if love.filesystem.exists(arg.file) then
+    local info = love.filesystem.getInfo(arg.file)
+    if info then
       game_state.map = gauge.map.new({
         data = love.filesystem.load(arg.file)
       })
@@ -58,7 +66,7 @@ love.load = function ()
   end)
   game_state.render = function ()
     love.graphics.push()
-    --love.graphics.scale(game_state.camera.scale)
+    -- love.graphics.scale(game_state.camera.scale)
     if game_state.map then
       game_state.map.render()
     end
@@ -86,7 +94,12 @@ love.load = function ()
 
   local untrusted_code = assert(love.filesystem.load("game/main.lua"))
   local trusted_code = sandbox.new(untrusted_code, {gauge=gauge, math=math, print=print, tween=tween, love=love})
-  pcall(trusted_code)
+  local success, err = pcall(trusted_code)
+
+  if not success then
+    errorMessage = err
+  end
+  
 end
 
 love.update = function (dt)
@@ -103,7 +116,24 @@ love.update = function (dt)
   gauge.state.get().update(dt)
 end
 
+local function printTable(tbl, x, y)
+  local lineHeight = 20
+  for k, v in pairs(tbl) do
+      love.graphics.print(k .. ": " .. tostring(v), x, y)
+      y = y + lineHeight
+  end
+end
+
 love.draw = function ()
+  local state = gauge.state.get()
+  -- printTable(state, 100, 100)
+
+  if errorMessage then
+    -- Display the error message
+    love.graphics.setColor(1, 0, 0) -- Red text
+    love.graphics.printf("Error: " .. errorMessage, 10, 10, love.graphics.getWidth() - 20)
+  end
+
   gauge.state.get().render()
 end
 

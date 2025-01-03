@@ -5,7 +5,7 @@ local M = {}
 M.new = function(arg)
   local static = false
   if arg.static then static = true end
-  local source = love.audio.newSource(arg.file, static)
+  local source = love.audio.newSource(arg.file, static and "static" or "stream")
 
   if arg.volume then source:setVolume(arg.volume) end
   if arg.loop then source:setLooping(arg.loop) end

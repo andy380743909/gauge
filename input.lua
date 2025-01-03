@@ -77,11 +77,15 @@ M.update = function (dt)
     ranges = {}
   }
   
-  if love.joystick.getNumJoysticks() > 0 then
-    for i=1,love.joystick.getNumAxes(1) do
-      raw.joystick.axis[i] = love.joystick.getAxis(1, i)
+  if love.joystick.getJoystickCount() > 0 then
+    local joystick = love.joystick.getJoysticks()[1] -- Get the first connected joystick
+    if joystick then
+        for i = 1, joystick:getAxisCount() do
+            raw.joystick.axis[i] = joystick:getAxis(i)
+        end
     end
   end
+
 
   for _,context in ipairs(contexts) do
     if context.active() then

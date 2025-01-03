@@ -28,12 +28,14 @@ love.load = function ()
     end
   )
 
-  local modes = love.graphics.getModes()
+  local modes = love.window.getFullscreenModes()
   table.sort(modes, function(a, b)
-    return a.width*a.height > b.width*b.height
+      return a.width * a.height > b.width * b.height
   end)
-  native_mode = modes[1]
-  love.graphics.setMode(native_mode.width, native_mode.height, true)
+  
+  local native_mode = modes[1]
+  love.window.setMode(native_mode.width, native_mode.height, { fullscreen = true })
+  
 
   local game_state = gauge.state.new()
   gauge.event.subscribe("loadMap", function (arg)

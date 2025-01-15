@@ -78,7 +78,13 @@ M.update = function (dt)
   }
   
   if love.joystick.getJoystickCount() > 0 then
-    local joystick = love.joystick.getJoysticks()[1] -- Get the first connected joystick
+    local joystick
+    if love.system.getOS() == "iOS" or love.system.getOS() == "Android" then
+      joystick = love.joystick.getJoysticks()[2] -- Get the virtual joystick
+    else
+      joystick = love.joystick.getJoysticks()[1] -- Get the first joystick
+    end
+
     if joystick then
         for i = 1, joystick:getAxisCount() do
             raw.joystick.axis[i] = joystick:getAxis(i)
